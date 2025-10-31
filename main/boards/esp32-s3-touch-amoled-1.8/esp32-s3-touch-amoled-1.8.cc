@@ -287,13 +287,13 @@ public:
         boot_button_(BOOT_BUTTON_GPIO) {
         InitializePowerSaveTimer();
         InitializeCodecI2c();
-        InitializeTca9554();
-        InitializeAxp2101();
-        InitializeSpi();
-        InitializeSH8601Display();
-        InitializeTouch();
-        InitializeButtons();
-        InitializeTools();
+        //InitializeTca9554();
+//        InitializeAxp2101();
+//        InitializeSpi();
+//        InitializeSH8601Display();
+//        InitializeTouch();
+//        InitializeButtons();
+//        InitializeTools();
     }
 
     virtual AudioCodec* GetAudioCodec() override {

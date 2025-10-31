@@ -353,7 +353,7 @@ void Application::Start() {
     auto display = board.GetDisplay();
 
     // Print board name/version info
-    display->SetChatMessage("system", SystemInfo::GetUserAgent().c_str());
+    //display->SetChatMessage("system", SystemInfo::GetUserAgent().c_str());
 
     /* Setup the audio service */
     auto codec = board.GetAudioCodec();
@@ -385,7 +385,7 @@ void Application::Start() {
     board.StartNetwork();
 
     // Update the status bar immediately to show the network state
-    display->UpdateStatusBar(true);
+    //display->UpdateStatusBar(true);
 
     // Check for new assets version
     CheckAssetsVersion();
@@ -395,7 +395,7 @@ void Application::Start() {
     CheckNewVersion(ota);
 
     // Initialize the protocol
-    display->SetStatus(Lang::Strings::LOADING_PROTOCOL);
+    //display->SetStatus(Lang::Strings::LOADING_PROTOCOL);
 
     // Add MCP common tools before initializing the protocol
     auto& mcp_server = McpServer::GetInstance();
@@ -536,8 +536,8 @@ void Application::Start() {
     has_server_time_ = ota.HasServerTime();
     if (protocol_started) {
         std::string message = std::string(Lang::Strings::VERSION) + ota.GetCurrentVersion();
-        display->ShowNotification(message.c_str());
-        display->SetChatMessage("system", "");
+        //display->ShowNotification(message.c_str());
+        //display->SetChatMessage("system", "");
         // Play the success sound to indicate the device is ready
         audio_service_.PlaySound(Lang::Sounds::OGG_SUCCESS);
     }
@@ -600,7 +600,7 @@ void Application::MainEventLoop() {
         if (bits & MAIN_EVENT_CLOCK_TICK) {
             clock_ticks_++;
             auto display = Board::GetInstance().GetDisplay();
-            display->UpdateStatusBar();
+            //display->UpdateStatusBar();
         
             // Print the debug info every 10 seconds
             if (clock_ticks_ % 10 == 0) {
@@ -680,6 +680,7 @@ void Application::SetDeviceState(DeviceState state) {
     auto display = board.GetDisplay();
     auto led = board.GetLed();
     led->OnStateChanged();
+    ESP_LOGI(TAG, "2222222222222");
     switch (state) {
         case kDeviceStateUnknown:
         case kDeviceStateIdle:
@@ -719,6 +720,7 @@ void Application::SetDeviceState(DeviceState state) {
             // Do nothing
             break;
     }
+    ESP_LOGI(TAG, "3333333333333");
 }
 
 void Application::Reboot() {
