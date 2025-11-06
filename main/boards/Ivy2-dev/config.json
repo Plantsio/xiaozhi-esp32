@@ -4,7 +4,8 @@
         {
             "name": "Ivy2-dev",
             "sdkconfig_append": [
-                "CONFIG_LANGUAGE_ZH_CN=y"
+                "CONFIG_LANGUAGE_ZH_CN=y",
+                "CONFIG_USE_ESP_WAKE_WORD=y"
             ]
         }
     ]
