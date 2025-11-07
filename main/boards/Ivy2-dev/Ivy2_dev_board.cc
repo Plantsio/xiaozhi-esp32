@@ -74,10 +74,15 @@ private:
     i2c_master_bus_handle_t i2c_bus_;
     // i2c_master_dev_handle_t pca9557_handle_;
     Button boot_button_;
+    Button volume_up_button_;
+    Button volume_down_button_;
     // Display* display_;
     LcdDisplay* display_;
     // Pca9557* pca9557_;
     // Esp32Camera* camera_;
+
+
+
 
     void InitializeI2c() {
         // Initialize I2C peripheral
@@ -122,65 +127,88 @@ private:
     }
 
 
-    // void InitializeButtons() {
-    //     boot_button_.OnClick([this]() {
-    //         auto& app = Application::GetInstance();
-    //         if (app.GetDeviceState() == kDeviceStateStarting && !WifiStation::GetInstance().IsConnected()) {
-    //             ResetWifiConfiguration();
-    //         }
-    //         app.ToggleChatState();
-    //     });
+    void InitializeButtons() {
+            boot_button_.OnClick([this]() {
+                auto& app = Application::GetInstance();
+                if (app.GetDeviceState() == kDeviceStateStarting && !WifiStation::GetInstance().IsConnected()) {
+                    ResetWifiConfiguration();
+                }
+                app.ToggleChatState();
+            });
 
-// #if CONFIG_USE_DEVICE_AEC
-//         boot_button_.OnDoubleClick([this]() {
-//             auto& app = Application::GetInstance();
-//             if (app.GetDeviceState() == kDeviceStateIdle) {
-//                 app.SetAecMode(app.GetAecMode() == kAecOff ? kAecOnDeviceSide : kAecOff);
-//             }
-//         });
-// #endif
-    // }
 
-//     void InitializeSt7789Display() {
-//         esp_lcd_panel_io_handle_t panel_io = nullptr;
-//         esp_lcd_panel_handle_t panel = nullptr;
-//         // 液晶屏控制IO初始化
-//         ESP_LOGD(TAG, "Install panel IO");
-//         esp_lcd_panel_io_spi_config_t io_config = {};
-//         io_config.cs_gpio_num = GPIO_NUM_41;
-//         io_config.dc_gpio_num = GPIO_NUM_40;
-//         io_config.spi_mode = 2;
-//         io_config.pclk_hz = 60 * 1000 * 1000;
-//         io_config.trans_queue_depth = 10;
-//         io_config.lcd_cmd_bits = 8;
-//         io_config.lcd_param_bits = 8;
-//         ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi(SPI3_HOST, &io_config, &panel_io));
-//
-//         // 初始化液晶屏驱动芯片ST7789
-//         ESP_LOGD(TAG, "Install LCD driver");
-//         esp_lcd_panel_dev_config_t panel_config = {};
-//         panel_config.reset_gpio_num = GPIO_NUM_NC;
-//         panel_config.rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB;
-//         panel_config.bits_per_pixel = 16;
-//         ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(panel_io, &panel_config, &panel));
-//
-//         esp_lcd_panel_reset(panel);
-//         gpio_set_level(GPIO_NUM_41,0);
-//         // pca9557_->SetOutputState(0, 0);
-//
-//         esp_lcd_panel_init(panel);
-//         esp_lcd_panel_invert_color(panel, true);
-//         esp_lcd_panel_swap_xy(panel, DISPLAY_SWAP_XY);
-//         esp_lcd_panel_mirror(panel, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y);
-//         esp_lcd_panel_disp_on_off(panel, true);
-//
-// #if CONFIG_USE_EMOTE_MESSAGE_STYLE
-//         display_ = new emote::EmoteDisplay(panel, panel_io, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-// #else
-//         display_ = new SpiLcdDisplay(panel_io, panel,
-//             DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_OFFSET_X, DISPLAY_OFFSET_Y, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y, DISPLAY_SWAP_XY);
-// #endif
-//     }
+            volume_up_button_.OnClick([this]() {
+                auto codec = GetAudioCodec();
+                auto volume = codec->output_volume() + 10;
+                if (volume > 100) {
+                    volume = 100;
+                }
+                codec->SetOutputVolume(volume);
+                // GetDisplay()->ShowNotification(Lang::Strings::VOLUME + std::to_string(volume));
+            });
+
+            volume_up_button_.OnLongPress([this]() {
+                GetAudioCodec()->SetOutputVolume(100);
+                // GetDisplay()->ShowNotification(Lang::Strings::MAX_VOLUME);
+            });
+
+            volume_down_button_.OnClick([this]() {
+                auto codec = GetAudioCodec();
+                auto volume = codec->output_volume() - 10;
+                if (volume < 0) {
+                    volume = 0;
+                }
+                codec->SetOutputVolume(volume);
+                // GetDisplay()->ShowNotification(Lang::Strings::VOLUME + std::to_string(volume));
+            });
+
+            volume_down_button_.OnLongPress([this]() {
+                GetAudioCodec()->SetOutputVolume(0);
+                // GetDisplay()->ShowNotification(Lang::Strings::MUTED);
+            });
+
+        }
+
+    //     void InitializeSt7789Display() {
+    //         esp_lcd_panel_io_handle_t panel_io = nullptr;
+    //         esp_lcd_panel_handle_t panel = nullptr;
+    //         // 液晶屏控制IO初始化
+    //         ESP_LOGD(TAG, "Install panel IO");
+    //         esp_lcd_panel_io_spi_config_t io_config = {};
+    //         io_config.cs_gpio_num = GPIO_NUM_41;
+    //         io_config.dc_gpio_num = GPIO_NUM_40;
+    //         io_config.spi_mode = 2;
+    //         io_config.pclk_hz = 60 * 1000 * 1000;
+    //         io_config.trans_queue_depth = 10;
+    //         io_config.lcd_cmd_bits = 8;
+    //         io_config.lcd_param_bits = 8;
+    //         ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi(SPI3_HOST, &io_config, &panel_io));
+    //
+    //         // 初始化液晶屏驱动芯片ST7789
+    //         ESP_LOGD(TAG, "Install LCD driver");
+    //         esp_lcd_panel_dev_config_t panel_config = {};
+    //         panel_config.reset_gpio_num = GPIO_NUM_NC;
+    //         panel_config.rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB;
+    //         panel_config.bits_per_pixel = 16;
+    //         ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(panel_io, &panel_config, &panel));
+    //
+    //         esp_lcd_panel_reset(panel);
+    //         gpio_set_level(GPIO_NUM_41,0);
+    //         // pca9557_->SetOutputState(0, 0);
+    //
+    //         esp_lcd_panel_init(panel);
+    //         esp_lcd_panel_invert_color(panel, true);
+    //         esp_lcd_panel_swap_xy(panel, DISPLAY_SWAP_XY);
+    //         esp_lcd_panel_mirror(panel, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y);
+    //         esp_lcd_panel_disp_on_off(panel, true);
+    //
+    // #if CONFIG_USE_EMOTE_MESSAGE_STYLE
+    //         display_ = new emote::EmoteDisplay(panel, panel_io, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    // #else
+    //         display_ = new SpiLcdDisplay(panel_io, panel,
+    //             DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_OFFSET_X, DISPLAY_OFFSET_Y, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y, DISPLAY_SWAP_XY);
+    // #endif
+    //     }
 
     void InitializeSt7789Display() {
         esp_lcd_panel_io_handle_t panel_io = nullptr;
@@ -302,12 +330,15 @@ private:
     // }
 
 public:
-    Ivy2DevBoard() : boot_button_(BOOT_BUTTON_GPIO) {
+    Ivy2DevBoard() :
+    boot_button_(BOOT_BUTTON_GPIO),
+    volume_up_button_(VOLUME_UP_BUTTON_GPIO),
+    volume_down_button_(VOLUME_DOWN_BUTTON_GPIO) {
         InitializeI2c();
         InitializeSpi();
         InitializeSt7789Display();
         // InitializeTouch();
-        // InitializeButtons();
+        InitializeButtons();
         // InitializeCamera();
 
         GetBacklight()->SetBrightness(100);
